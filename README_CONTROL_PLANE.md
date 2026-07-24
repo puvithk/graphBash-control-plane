@@ -187,8 +187,6 @@ nodepilot-control-plane/
 │   ├── schemas/
 │   ├── security/
 │   ├── services/
-│   ├── telemetry/
-│   ├── workers/
 │   └── main.py
 ├── tests/
 │   ├── unit/
@@ -234,14 +232,14 @@ Platform endpoints:
 |---|---|
 | Repository created | Completed |
 | README and architecture | Completed |
-| FastAPI project skeleton | Next |
+| FastAPI project skeleton | Started |
 | Configuration management | Planned |
-| Health and readiness endpoints | Planned |
+| Health and readiness endpoints | Started |
 | PostgreSQL integration | Planned |
 | Redis integration | Planned |
 | Node registry | Planned |
 | MCP tool registry | Planned |
-| LangGraph state and workflow | Planned |
+| LangGraph state and workflow | Started |
 | Policy engine | Planned |
 | Approval service | Planned |
 | Audit service | Planned |
