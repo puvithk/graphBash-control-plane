@@ -1,6 +1,6 @@
-# NodePilot Control Plane
+# GraphBash Control Plane
 
-> Central orchestration, policy, approval, and audit service for the NodePilot platform.
+> Central orchestration, policy, approval, and audit service for the GraphBash platform.
 
 ![Status](https://img.shields.io/badge/status-foundation-yellow)
 ![Python](https://img.shields.io/badge/Python-3.12%2B-blue)
@@ -9,7 +9,7 @@
 
 ## Overview
 
-The NodePilot Control Plane is the central intelligence and coordination service of NodePilot.
+The GraphBash Control Plane is the central intelligence and coordination service of GraphBash.
 
 It receives administration requests, authenticates the user, loads workflow context, uses LangGraph to classify and plan the task, selects an MCP tool, evaluates security policies, pauses for approval when required, dispatches the request to a Linux node agent, validates the result, and stores a complete audit record.
 
@@ -172,7 +172,7 @@ END
 ## Planned Repository Structure
 
 ```text
-nodepilot-control-plane/
+GraphBash-control-plane/
 ├── app/
 │   ├── api/
 │   │   └── v1/
