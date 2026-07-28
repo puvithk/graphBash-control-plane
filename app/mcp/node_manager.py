@@ -26,6 +26,6 @@ class NodeManager(BaseModel):
         if node is None:
             raise ValueError(f"Node {node_id} not registered")
 
-        return node.node_tools
+        return node
 
     
