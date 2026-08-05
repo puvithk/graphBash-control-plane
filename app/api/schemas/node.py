@@ -45,6 +45,29 @@ class NodeCredential(SQLModel , table=true):
 
 
 
+class NodeLifeCycle(SQLModel , table=true):
+    node_id : str = Field(default=None , primary_key=True)
+
+    node_status : str = Field(default=... , description="Node status")
+
+    node_updated_at : datetime = Field(default=... , description="Node updated at")
+
+    previous_status : str = Field(default=... , description="Previous node status")
+
+    reason : str = Field(default=... , description="Reason for status change")
+
+    last_connected_at : datetime = Field(default=... , description="Last connected at")
+
+    last_disconnected_at : datetime = Field(default=... , description="Last disconnected at")
+
+    last_heartbeat : datetime = Field(default=... , description="Last heartbeat")
+
+    last_heartbeat_received_at : datetime = Field(default=... , description="Last heartbeat received at")
+
+    last_task_sent_at : datetime = Field(default=... , description="Last task sent at")
+
+    last_task_received_at : datetime = Field(default=... , description="Last task received at")
+
     
 
     
