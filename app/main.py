@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from .api.routes import node_routes
 
 
 app = FastAPI(
@@ -7,6 +8,7 @@ app = FastAPI(
     version = "0.0.1",
 )
 
+app.include_router(node_routes.route)
 
 
 @app.get("/health")
