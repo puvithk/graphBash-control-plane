@@ -1,3 +1,4 @@
+from app.api.dto.node_dto import NodeRequestDTO
 from typing import Annotated, List
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends
@@ -15,3 +16,10 @@ SessionDep = Annotated[Session, Depends(get_session)]
 def get_all_nodes(session: SessionDep):
     node_service = NodeService(session)
     return node_service.get_all_node()
+
+
+@route.post("/create" , response_model=NodeDetails):
+def create_node(session : SessionDep , node_request : NodeRequestDTO):
+    node_service = NodeService(session)
+    return node_service.create_node(node_request=node_request)
+
