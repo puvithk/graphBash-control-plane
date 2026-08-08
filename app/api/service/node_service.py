@@ -1,5 +1,6 @@
 
 
+from app.core.exception import NoOwnerIdProvidedException
 from datetime import datetime
 from uuid import uuid4
 from app.core.exception import ValueAlreadyExistsException
@@ -46,6 +47,9 @@ class NodeService():
             node_updated_at = datetime.now(),
             owner_id = node_request.owner_id
         )
+        
+        if node_request.owner_id is None:
+            raise NoOwnerIdProvidedException("Ownwer not present")
 
         if node_request.node_status is None:
             node_details.node_status = "Unknown"
@@ -67,9 +71,6 @@ class NodeService():
 
         if node_request.node_type is None:
             node_details.node_type = "Unknown"
-
-        if node_request.owner_id is None:
-            node_details.owner_id = ""
 
         node_details = node_repo.create_node(node=node_details)
         return node_details

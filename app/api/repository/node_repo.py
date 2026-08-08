@@ -13,3 +13,10 @@ class NodeRepository():
 
     def get_node_by_id(self , node_id : str) -> NodeDetails | None:
         return self.session.get(NodeDetails , node_id)
+
+    def create_node(self , node: NodeDetails):
+        self.session.add(node)
+        self.session.commit()
+        self.session.refresh(node)
+
+        return node
