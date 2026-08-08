@@ -17,6 +17,11 @@ def get_all_nodes(session: SessionDep):
     node_service = NodeService(session)
     return node_service.get_all_node()
 
+@route.get("/{node_id}" , response_class=NodeDetails)
+def get_node_by_id(session : SessionDep  , node_id : str):
+
+    node_service = NodeService(session)
+    return node_service.get_node_by_id(node_id)
 
 @route.post("/create" , response_model=NodeDetails)
 def create_node(session : SessionDep , node_request : NodeRequestDTO):
