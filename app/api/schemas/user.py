@@ -3,8 +3,8 @@
 
 from enum import Enum
 from sqlalchemy import table
-from sqlmodel import SQLModel, Field , DateTime
-
+from sqlmodel import SQLModel, Field , DateTime  
+from datetime import datetime
 
 
 class UserRole(str, Enum):
@@ -31,9 +31,9 @@ class User(SQLModel , table=True):
     
     user_role : UserRole = Field(default=None , index=True)
     
-    user_created_at : DateTime = Field(default=None , index=True)
+    user_created_at : datetime = Field(default=None , index=True)
     
-    user_updated_at : DateTime = Field(default=None , index=True)
+    user_updated_at : datetime = Field(default=None , index=True)
     
     user_status : UserStatus = Field(default=None , index=True)
     

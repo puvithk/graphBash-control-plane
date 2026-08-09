@@ -42,9 +42,7 @@ class NodeDetails(SQLModel , table=True):
         index=True
     )
 
-    owner : User = Relationship(
-        back_populates="nodes"
-    )
+
 
 class NodeCredential(SQLModel , table= True):
     node_id : str = Field(default=None , primary_key=True)

@@ -1,5 +1,6 @@
+
 from fastapi import FastAPI
-from .api.routes import node_routes
+from .api.routes import node_routes , auth
 
 
 app = FastAPI(
@@ -9,6 +10,8 @@ app = FastAPI(
 )
 
 app.include_router(node_routes.route)
+
+app.include_router(auth.route)
 
 
 @app.get("/health")
