@@ -17,7 +17,7 @@ def get_all_nodes(session: SessionDep):
     node_service = NodeService(session)
     return node_service.get_all_node()
 
-@route.get("/{node_id}" , response_class=NodeDetails)
+@route.get("/{node_id}" , response_model=NodeDetails)
 def get_node_by_id(session : SessionDep  , node_id : str):
 
     node_service = NodeService(session)

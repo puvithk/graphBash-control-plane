@@ -1,5 +1,6 @@
 
 
+from app.core.exception import IdRequiredException
 from app.core.exception import NoOwnerIdProvidedException
 from datetime import datetime
 from uuid import uuid4
@@ -74,3 +75,15 @@ class NodeService():
 
         node_details = node_repo.create_node(node=node_details)
         return node_details
+    
+
+    def get_node_by_id(self , node_id : str = None):
+        
+        if node_id  is None:
+            raise IdRequiredException("Node id is requeired")
+
+        node_repo  = NodeRepository(self.session)
+
+        return node_repo.get_node_by_id(node_id)
+
+
