@@ -1,5 +1,8 @@
 
 
+from sqlmodel import Relationship
+from http.cookiejar import FileCookieJar
+from app.api.schemas.user import User
 from sqlalchemy import JSON
 from sqlalchemy import Column
 from sqlalchemy.dialects.postgresql import Any
@@ -34,7 +37,14 @@ class NodeDetails(SQLModel , table=True):
 
     node_updated_at : datetime = Field( description="Node updated at")
 
-    owner_id : str = Field( description="Owner ID")
+    owner_id : int = Field(
+        foreign_key="user.user_id",
+        index=True
+    )
+
+    owner : User = Relationship(
+        back_populates="nodes"
+    )
 
 class NodeCredential(SQLModel , table= True):
     node_id : str = Field(default=None , primary_key=True)
