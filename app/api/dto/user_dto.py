@@ -1,5 +1,6 @@
 
 
+from sqlalchemy.engine import default
 from app.api.schemas.user import UserStatus
 from pydantic import BaseModel , Field
 from datetime import datetime
@@ -26,3 +27,8 @@ class UserSignUpResponse(BaseModel):
     user_status : UserStatus  = Field(default=None)
     user_created_at : datetime = Field(default=None)
     user_updated_at : datetime = Field(default=None)
+
+class UserLoginResponse(BaseModel):
+
+    token : str = Field(default=None , description="JWT ir session token after login")
+    
