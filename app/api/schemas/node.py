@@ -1,6 +1,5 @@
 
 
-from sqlmodel import Relationship
 from http.cookiejar import FileCookieJar
 from app.api.schemas.user import User
 from sqlalchemy import JSON

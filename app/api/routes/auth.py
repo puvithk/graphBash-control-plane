@@ -27,7 +27,7 @@ SessionDep = Annotated[Session ,  Depends(get_session)]
 
 
 @route.post("/signup" , response_model= UserSignUpResponse)
-def signup(self , session : SessionDep, user : UserSignUpRequest):
+def signup( session : SessionDep, user : UserSignUpRequest):
     auth_service = AuthService(session)
     return auth_service.signup(user)
 
@@ -38,10 +38,10 @@ def signup(self , session : SessionDep, user : UserSignUpRequest):
         401: {"description": "Invalid credentials"},
     },
 )
-def login(self , session : SessionDep , user : UserSignInRequest):
+def login( session : SessionDep , user : UserSignInRequest):
     admin_service = AuthService(session)
     try :
-        admin_service.login(user)
+        return admin_service.login(user)
     except InvalidCredentialsException:
         raise HTTPException(status_code=401 , detail="Invalid credentials")
     except ValueNotFoundException:
