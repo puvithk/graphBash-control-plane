@@ -1,6 +1,9 @@
 
 
 
+from fastapi import HTTPException
+from app.core.exception import InvalidCredentialsException
+from app.core.exception import ValueNotFoundException
 from app.api.service.auth_service import AuthService
 from app.api.service.admin import AdminService
 from app.api.dto.user_dto import UserLoginResponse
@@ -28,6 +31,18 @@ def signup(self , session : SessionDep, user : UserSignUpRequest):
     auth_service = AuthService(session)
     return auth_service.signup(user)
 
-@route.post("/login" , response_model = UserLoginResponse)
+@route.post(
+    "/login",
+    response_model=UserLoginResponse,
+    responses={
+        401: {"description": "Invalid credentials"},
+    },
+)
 def login(self , session : SessionDep , user : UserSignInRequest):
-    admin_service = AdminService()
+    admin_service = AuthService(session)
+    try :
+        admin_service.login(user)
+    except InvalidCredentialsException:
+        raise HTTPException(status_code=401 , detail="Invalid credentials")
+    except ValueNotFoundException:
+        raise HTTPException(status_code=401 , detail="Invalid credentials")
