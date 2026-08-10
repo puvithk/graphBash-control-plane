@@ -1,4 +1,5 @@
 
+from app.core.exception import ValueNotFoundException
 from uuid import uuid4
 from datetime import datetime
 from app.core.exception import ValueAlreadyExistsException
@@ -42,3 +43,11 @@ class UserService():
             user_created_at = user.user_created_at,
             user_updated_at = user.user_updated_at
         )
+
+    def get_user_by_email(self , username : str):
+        user_repo = UserRepositoy(self.session)
+        user = user_repo.get_user_by_email(username)
+        if user is None:
+            raise ValueNotFoundException("User Not found")
+        return user
+        
