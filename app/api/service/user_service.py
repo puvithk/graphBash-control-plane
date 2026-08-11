@@ -7,6 +7,7 @@ from app.api.repository.user_repo import UserRepositoy
 from sqlalchemy.orm import Session
 from ..dto.user_dto import UserSignUpRequest , UserSignUpResponse
 from ..schemas.user import User
+from app.api.utils.password import PasswordUtils
 class UserService():
 
 
@@ -25,7 +26,7 @@ class UserService():
  
             user_name = user_request.user_name,
             user_email = user_request.user_email,
-            user_hash = user_request.user_password,
+            user_hash = PasswordUtils().hash(user_request.user_password),
             user_role = user_request.user_role,
             user_status = user_request.user_status,
             user_created_at = datetime.now(),
