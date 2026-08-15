@@ -24,8 +24,12 @@ class AuthService:
 
 
         token = jwt_service.create_token(
-            {"email" : db_user.user_email}
-            )
+            {
+                "sub": str(db_user.user_id),
+                "user_id": db_user.user_id,
+                "email": db_user.user_email,
+            }
+        )
 
         return UserLoginResponse(token=token)
 

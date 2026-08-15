@@ -16,10 +16,12 @@ class NodeService():
         self.session = session
 
 
-    def get_all_node(self) -> List[NodeDetails]:
+    def get_all_node(self , owner_id : int) -> List[NodeDetails]:
         
         node_repo = NodeRepository(self.session)
-        node_list = node_repo.get_all_nodees()
+        if owner_id is None:
+            raise NoOwnerIdProvidedException("Owner not present")
+        node_list = node_repo.get_all_nodees(owner_id)
         return node_list
 
 
