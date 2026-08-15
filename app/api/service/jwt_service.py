@@ -25,15 +25,11 @@ class JwtService():
 
     def verify_token(self , token : str ):
         #Verify the token 
-        payload : dict = self._decode(token)
-        #Get the expire time 
-        expire_time = payload.get("exp")
-        #Check the expire time 
-        if expire_time < datetime.now(timezone.utc):
-            raise InvalidCredentialsException("Token is expired")
-        
-        #Return the payload
-        return payload
+        try:
+            payload : dict = self._decode(token)
+            return payload
+        except jwt.PyJWTError as e:
+            raise InvalidCredentialsException(f"Invalid or expired token: {str(e)}")
 
     def _encode(self , payload : dict):
         
