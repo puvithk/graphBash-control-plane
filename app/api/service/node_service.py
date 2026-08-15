@@ -25,12 +25,13 @@ class NodeService():
         return node_list
 
 
-    def create_node(self,node_request : NodeRequestDTO) -> NodeDetails:
+    def create_node(self,node_request : NodeRequestDTO , owner_id : int = None) -> NodeDetails:
         
         
         node_repo = NodeRepository(self.session)
+
         if node_request.node_id:
-            if node_repo.get_node_by_id(node_request.node_id):
+            if node_repo.get_node_by_id(node_request.node_id , owner_id):
                 raise ValueAlreadyExistsException("Node ID already exisits")
 
         #generate node id using uuid4
@@ -48,10 +49,10 @@ class NodeService():
             node_status = node_request.node_status,
             node_created_at = datetime.now(),
             node_updated_at = datetime.now(),
-            owner_id = node_request.owner_id
+            owner_id = owner_id
         )
         
-        if node_request.owner_id is None:
+        if owner_id is None:
             raise NoOwnerIdProvidedException("Ownwer not present")
 
         if node_request.node_status is None:
@@ -79,13 +80,16 @@ class NodeService():
         return node_details
     
 
-    def get_node_by_id(self , node_id : str = None):
+    def get_node_by_id(self , node_id : str = None , owner_id : int = None):
         
         if node_id  is None:
             raise IdRequiredException("Node id is requeired")
+        
+        if owner_id is None:
+            raise NoOwnerIdProvidedException("Owner not present")
 
         node_repo  = NodeRepository(self.session)
 
-        return node_repo.get_node_by_id(node_id)
+        return node_repo.get_node_by_id(node_id , owner_id)
 
 
