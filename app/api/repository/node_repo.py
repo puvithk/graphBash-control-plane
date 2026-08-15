@@ -7,12 +7,15 @@ class NodeRepository():
         self.session = session 
     
 
-    def get_all_nodees(self) -> List[NodeDetails]:
+    def get_all_nodees(self , owner_id : int) -> List[NodeDetails]:
+        return self.session.execute(select(NodeDetails).where(NodeDetails.owner_id == owner_id)).scalars().all()
 
-        return self.session.execute(select(NodeDetails)).scalars().all()
-
-    def get_node_by_id(self , node_id : str) -> NodeDetails | None:
-        return self.session.get(NodeDetails , node_id)
+    def get_node_by_id(self , node_id : str , owner_id : int) -> NodeDetails | None:
+        statement = select(NodeDetails).where(
+            NodeDetails.node_id ==  node_id  ,
+            NodeDetails.owner_id == owner_id
+        )
+        return self.session.execute(statement).scalar_one_or_none()
 
     def create_node(self , node: NodeDetails):
         self.session.add(node)

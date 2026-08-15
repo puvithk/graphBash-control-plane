@@ -1,5 +1,6 @@
 
 
+from app.api.schemas.node import NodeStatus
 from pydantic import BaseModel , Field
 from datetime import datetime
 class NodeRequestDTO(BaseModel):
@@ -20,6 +21,5 @@ class NodeRequestDTO(BaseModel):
 
     node_metadata : dict = Field(default={} , description="Node metadata")
 
-    node_status : str = Field( description="Node status")
-    
-    owner_id : str = Field( description="Owner ID")
+    node_status : NodeStatus = Field( description="Node status")
+

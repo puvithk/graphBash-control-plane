@@ -1,5 +1,8 @@
 
 
+from enum import Enum
+from http.cookiejar import FileCookieJar
+from app.api.schemas.user import User
 from sqlalchemy import JSON
 from sqlalchemy import Column
 from sqlalchemy.dialects.postgresql import Any
@@ -9,7 +12,14 @@ from sqlalchemy import table
 from sqlmodel import SQLModel ,Field
 from datetime import datetime
 
-
+class NodeStatus(str , Enum):
+    REGISTERED = "registered"
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    BLOCKED = "blocked"
+    UNKNOWN = "unknown"
+    
+    
 
 class NodeDetails(SQLModel , table=True):
     node_id : str = Field(default=None , primary_key=True)
@@ -28,13 +38,18 @@ class NodeDetails(SQLModel , table=True):
 
     node_metadata : dict = Field(default={} , sa_column=Column(JSON) , description="Node metadata")
 
-    node_status : str = Field( description="Node status")
+    node_status : NodeStatus = Field( description="Node status")
 
     node_created_at : datetime = Field( description="Node created at")
 
     node_updated_at : datetime = Field( description="Node updated at")
 
-    owner_id : str = Field( description="Owner ID")
+    owner_id : int = Field(
+        foreign_key="user.user_id",
+        index=True
+    )
+
+
 
 class NodeCredential(SQLModel , table= True):
     node_id : str = Field(default=None , primary_key=True)
