@@ -1,4 +1,5 @@
 
+from typing import Annotated
 from functools import wraps
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -26,6 +27,9 @@ async def verify_auth_token(credentials: HTTPAuthorizationCredentials = Depends(
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+# Production Type Alias for Dependency Injection in Route Handlers
+CurrentUser = Annotated[dict, Depends(verify_auth_token)]
 
 
 def require_auth(func):
@@ -80,4 +84,4 @@ def require_auth(func):
 
         return await func(*args, **kwargs)
 
-    return wrapper
+    return wrapper
