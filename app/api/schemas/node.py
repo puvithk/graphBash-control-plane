@@ -1,5 +1,6 @@
 
 
+from typing import Optional
 from enum import Enum
 from http.cookiejar import FileCookieJar
 from app.api.schemas.user import User
@@ -61,6 +62,23 @@ class NodeCredential(SQLModel , table= True):
     certificate_expiry : datetime = Field(description="Certificate Expiry")
 
     certificate_serial_number : str = Field(description="Certificate Serial Number")
+
+
+class NodeRegisterDetails(SQLModel , table=True):
+
+    id : Optional[int] = Field(default=None , primary_key=True )
+
+    node_id : str = Field(description="Node ID")
+
+    owener_id : int = Field(description="Owner Id ")
+
+    token : str = Field(index=True , unique=True , description="Token")
+
+    expire_at : datetime = Field(description="TokenExpire At")
+
+    created_at : datetime = Field(description="Token Created At")
+
+
 
 
 

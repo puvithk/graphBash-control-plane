@@ -23,3 +23,12 @@ class NodeRequestDTO(BaseModel):
 
     node_status : NodeStatus = Field( description="Node status")
 
+class NodeRegistrationToken(BaseModel):
+
+    token : str = Field(description="Token")
+
+    expire_at : datetime = Field(description="TokenExpire At")
+
+
+
+    
