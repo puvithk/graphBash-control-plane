@@ -1,5 +1,6 @@
 
 
+from app.api.dto.node_dto import NodeRegistrationToken
 from app.core.exception import IdRequiredException
 from app.core.exception import NoOwnerIdProvidedException
 from datetime import datetime
@@ -91,5 +92,24 @@ class NodeService():
         node_repo  = NodeRepository(self.session)
 
         return node_repo.get_node_by_id(node_id , owner_id)
+
+
+    def node_registeration_request(self , node_request : NodeRequestDTO , owner_id : int = None) -> NodeRegistrationToken:
+        
+
+        # Check weather basic info is present 
+
+
+        # Generate a token using secure random module 
+
+        # Create Node Registration Token Update in database 
+
+        #Update the redis Make the expire time currentime + 15 min
+
+
+        # Return the NodeRegistrationToken 
+        pass 
+    
+ 
 
 
