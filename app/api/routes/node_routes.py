@@ -1,3 +1,4 @@
+from app.api.dto.node_dto import NodeRegistrationToken
 from fastapi import status
 from fastapi import HTTPException
 from typing import Annotated, List
@@ -73,4 +74,21 @@ def create_node(session: SessionDep, node_request: NodeRequestDTO , current_user
 
 
     return node_service.create_node(node_request=node_request , owner_id = owner_id)
+
+# Create a node registation route 
+@route.post("/register" , response_model=NodeRegistrationToken)
+def node_registeration_request(session : SessionDep , node_request : NodeRequestDTO , current_user : CurrentUser):
+    node_service = NodeService(session)
+
+    owner_id = current_user.get("user_id")
+    if owner_id is None and current_user.get("sub"):
+        owner_id = int(current_user.get("sub"))
+
+    if owner_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token payload",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return node_service.node_registeration_request(node_request=node_request , owner_id = owner_id)
 
