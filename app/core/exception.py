@@ -16,12 +16,22 @@ class IdRequiredException(Exception):
         self.message = message 
         super().__init__(self.message)
 
+class ValueRequiredException(Exception):
+    def __init__(self , message : str) :
+        self.message = message 
+        super().__init__(self.message)
 
 
 class ValueNotFoundException(Exception):
     def __init__(self , message : str) :
         self.message = message
         super().__init__(self.message)
+
+class DataBaseException(Exception):
+    def __init__(self , message : str) :
+        self.message = message
+        super().__init__(self.message)
+
 
 class InvalidCredentialsException(Exception):
     def __init__(self , message : str) :

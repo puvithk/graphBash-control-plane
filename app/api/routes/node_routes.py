@@ -75,9 +75,11 @@ def create_node(session: SessionDep, node_request: NodeRequestDTO , current_user
 
     return node_service.create_node(node_request=node_request , owner_id = owner_id)
 
-# Create a node registation route 
-@route.post("/register" , response_model=NodeRegistrationToken)
-def node_registeration_request(session : SessionDep , node_request : NodeRequestDTO , current_user : CurrentUser):
+
+
+
+@route.post("/node-registration-request" , response_model=NodeRegistrationToken)
+def node_registration_request(session : SessionDep , node_request : NodeRequestDTO , current_user : CurrentUser):
     node_service = NodeService(session)
 
     owner_id = current_user.get("user_id")
@@ -90,5 +92,14 @@ def node_registeration_request(session : SessionDep , node_request : NodeRequest
             detail="Invalid or expired token payload",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    return node_service.node_registeration_request(node_request=node_request , owner_id = owner_id)
 
+    try : 
+        node_registration_token = node_service.node_registration_request(node_request=node_request , owner_id = owner_id)
+    except Exception as e : 
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return node_registration_token
