@@ -68,15 +68,16 @@ class NodeRegisterDetails(SQLModel , table=True):
 
     id : Optional[int] = Field(default=None , primary_key=True )
 
-    node_id : str = Field(description="Node ID")
+    node_id : str = Field(index= True , description="Node ID")
 
-    owener_id : int = Field(description="Owner Id ")
+    owner_id : int = Field(description="Owner Id ")
 
     token : str = Field(index=True , unique=True , description="Token")
 
     expire_at : datetime = Field(description="TokenExpire At")
 
     created_at : datetime = Field(description="Token Created At")
+
 
 
 
