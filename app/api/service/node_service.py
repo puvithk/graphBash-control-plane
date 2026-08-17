@@ -1,16 +1,19 @@
 
 
+from app.api.schemas.node import NodeRegisterDetails
+from app.core.exception import DataBaseException
 from app.api.dto.node_dto import NodeRegistrationToken
 from app.core.exception import IdRequiredException
 from app.core.exception import NoOwnerIdProvidedException
-from datetime import datetime
+from datetime import datetime , timedelta
 from uuid import uuid4
-from app.core.exception import ValueAlreadyExistsException
+from app.core.exception import ValueAlreadyExistsException , ValueRequiredException
 from app.api.dto.node_dto import NodeRequestDTO
 from app.api.schemas.node import NodeDetails
 from typing import List
 from sqlalchemy.orm import Session
 from ..repository.node_repo import NodeRepository
+from ..utils.token import TokenUtils
 class NodeService():
 
     def __init__(self , session : Session):
@@ -94,21 +97,51 @@ class NodeService():
         return node_repo.get_node_by_id(node_id , owner_id)
 
 
-    def node_registeration_request(self , node_request : NodeRequestDTO , owner_id : int = None) -> NodeRegistrationToken:
+    def node_registration_request(self , node_request : NodeRequestDTO , owner_id : int = None) -> NodeRegistrationToken:
         
 
-        # Check weather basic info is present 
+        # Check weather basic info is present   
+        if node_request.hostname is None:
+            raise ValueRequiredException("Node name is Needed")
+        
+
+        if owner_id is None:
+            raise NoOwnerIdProvidedException("Owner not present")
 
 
         # Generate a token using secure random module 
+        token_utils = TokenUtils()
 
-        # Create Node Registration Token Update in database 
 
-        #Update the redis Make the expire time currentime + 15 min
+        token_generator =  token_utils.generate_node_registration_token()
 
+
+
+        node_registration_token = NodeRegisterDetails(
+            token = token_generator,
+            node_id = node_request.node_id ,
+            expire_at = datetime.now() + timedelta(minutes=15),
+            created_at = datetime.now(),
+            owner_id = owner_id,
+        )
+
+
+        # Create Node Registration Token Update in database
+        try :
+            node_repo = NodeRepository(self.session)
+            node_repo.create_node_registration_token(node_registration_token)
+        except Exception as e :
+            raise DataBaseException(str(e))        
+        # Update the redis Make the expire time currentime + 15 min
+        
+        
+        #Pending  
 
         # Return the NodeRegistrationToken 
-        pass 
+        return {
+            "token" : node_registration_token.token,
+            "expire_at" : node_registration_token.expire_at,
+        }
     
  
 
