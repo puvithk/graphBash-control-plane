@@ -14,15 +14,19 @@ from sqlmodel import SQLModel ,Field
 from datetime import datetime
 
 class NodeStatus(str , Enum):
+    PENDING = "pending"
     REGISTERED = "registered"
     ACTIVE = "active"
     INACTIVE = "inactive"
     BLOCKED = "blocked"
     UNKNOWN = "unknown"
     
-    
+
 
 class NodeDetails(SQLModel , table=True):
+
+    id : Optional[int] = Field(default=None , primary_key=True)
+
     node_id : str = Field(default=None , primary_key=True)
     
     hostname : str = Field(default=None , index=True)
@@ -53,7 +57,13 @@ class NodeDetails(SQLModel , table=True):
 
 
 class NodeCredential(SQLModel , table= True):
-    node_id : str = Field(default=None , primary_key=True)
+
+    id : Optional[int] = Field(default=None , primary_key=True)
+
+    node_id : int = Field(
+        foreign_key="nodedetails.id",
+        index= True ,
+        description="Node ID" )
 
     api_key_hash : str = Field(description="API Key Hash")
 
@@ -68,9 +78,14 @@ class NodeRegisterDetails(SQLModel , table=True):
 
     id : Optional[int] = Field(default=None , primary_key=True )
 
-    node_id : str = Field(index= True , description="Node ID")
+    node_id : int = Field(
+        foreign_key="nodedetails.id",
+        index= True , description="Node ID" )
 
-    owner_id : int = Field(description="Owner Id ")
+    owner_id : int = Field(
+        foreign_key="user.user_id",
+        index=True
+    )
 
     token : str = Field(index=True , unique=True , description="Token")
 
@@ -84,13 +99,19 @@ class NodeRegisterDetails(SQLModel , table=True):
 
 
 class NodeLifeCycle(SQLModel , table=True):
-    node_id : str = Field(default=None , primary_key=True)
 
-    node_status : str = Field( description="Node status")
+    id : Optional[int] = Field(default=None , primary_key=True)
+
+    node_id : int = Field(
+        foreign_key="nodedetails.id",
+        index= True ,
+        description="Node ID" )
+
+    node_status : NodeStatus = Field( description="Node status")
 
     node_updated_at : datetime = Field( description="Node updated at")
 
-    previous_status : str = Field( description="Previous node status")
+    previous_status : NodeStatus = Field( description="Previous node status")
 
     reason : str = Field( description="Reason for status change")
 
