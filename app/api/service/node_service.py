@@ -1,5 +1,6 @@
 
 
+from app.core.exception import ValueNotFoundException
 from app.api.schemas.node import NodeRegisterDetails
 from app.core.exception import DataBaseException
 from app.api.dto.node_dto import NodeRegistrationToken
@@ -101,9 +102,7 @@ class NodeService():
         
 
         # Check weather basic info is present   
-        if node_request.hostname is None:
-            raise ValueRequiredException("Node name is Needed")
-        
+
 
         if owner_id is None:
             raise NoOwnerIdProvidedException("Owner not present")
@@ -113,13 +112,21 @@ class NodeService():
         token_utils = TokenUtils()
 
 
+
+        try :
+            node_repo = NodeRepository(self.session)
+            current_node = node_repo.get_node_by_id(node_request.node_id , owner_id)
+            if not current_node:
+                raise ValueNotFoundException("Node not found")
+        except ValueNotFoundException as ve :
+            raise ve
+        except Exception as e:
+            raise DataBaseException(str(e))
+        
         token_generator =  token_utils.generate_node_registration_token()
-
-
-
         node_registration_token = NodeRegisterDetails(
             token = token_generator,
-            node_id = node_request.node_id ,
+            node_id = current_node.id ,
             expire_at = datetime.now() + timedelta(minutes=15),
             created_at = datetime.now(),
             owner_id = owner_id,
