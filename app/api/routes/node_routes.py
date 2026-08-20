@@ -1,3 +1,5 @@
+from app.api.dto.node_dto import NodeRegistrationTokenRequest
+from app.api.dto.node_dto import NodeRegistrationResponse
 from app.api.dto.node_dto import NodeRegistrationToken
 from fastapi import status
 from fastapi import HTTPException
@@ -103,3 +105,17 @@ def node_registration_request(session : SessionDep , node_request : NodeRequestD
         )
 
     return node_registration_token
+
+
+@route.post("/node-registration" , response_model = NodeRegistrationResponse )
+def node_registration(session : SessionDep , node_request : NodeRegistrationTokenRequest):
+    node_service = NodeService(session)
+    try :
+        node_registration = node_service.node_registration(node_request=node_request)
+    except Exception as e :
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return node_registration
