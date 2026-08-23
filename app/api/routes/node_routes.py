@@ -1,3 +1,4 @@
+from app.api.dto.node_dto import NodeRegistrationRequestDTO
 from app.api.dto.node_dto import NodeRegistrationTokenRequest
 from app.api.dto.node_dto import NodeRegistrationResponse
 from app.api.dto.node_dto import NodeRegistrationToken
@@ -81,7 +82,7 @@ def create_node(session: SessionDep, node_request: NodeRequestDTO , current_user
 
 
 @route.post("/node-registration-request" , response_model=NodeRegistrationToken)
-def node_registration_request(session : SessionDep , node_request : NodeRequestDTO , current_user : CurrentUser):
+def node_registration_request(session : SessionDep , node_request : NodeRegistrationRequestDTO , current_user : CurrentUser):
     node_service = NodeService(session)
 
     owner_id = current_user.get("user_id")

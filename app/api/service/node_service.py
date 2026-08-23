@@ -1,5 +1,9 @@
 
 
+from app.api.schemas.node import NodeCredential
+from app.core.exception import TokenExpiredException
+from app.core.exception import InvalidTokenException
+from app.api.dto.node_dto import NodeRegistrationTokenRequest
 from app.core.exception import ValueNotFoundException
 from app.api.schemas.node import NodeRegisterDetails
 from app.core.exception import DataBaseException
@@ -9,7 +13,7 @@ from app.core.exception import NoOwnerIdProvidedException
 from datetime import datetime , timedelta
 from uuid import uuid4
 from app.core.exception import ValueAlreadyExistsException , ValueRequiredException
-from app.api.dto.node_dto import NodeRequestDTO
+from app.api.dto.node_dto import NodeRequestDTO , NodeRegistrationRequestDTO
 from app.api.schemas.node import NodeDetails
 from typing import List
 from sqlalchemy.orm import Session
@@ -34,10 +38,6 @@ class NodeService():
         
         
         node_repo = NodeRepository(self.session)
-
-        if node_request.node_id:
-            if node_repo.get_node_by_id(node_request.node_id , owner_id):
-                raise ValueAlreadyExistsException("Node ID already exisits")
 
         #generate node id using uuid4
         node_id = uuid4()
@@ -98,7 +98,7 @@ class NodeService():
         return node_repo.get_node_by_id(node_id , owner_id)
 
 
-    def node_registration_request(self , node_request : NodeRequestDTO , owner_id : int = None) -> NodeRegistrationToken:
+    def node_registration_request(self , node_request : NodeRegistrationRequestDTO , owner_id : int = None) -> NodeRegistrationToken:
         
 
         # Check weather basic info is present   
@@ -153,3 +153,52 @@ class NodeService():
  
 
 
+    def node_registration(self , node_request : NodeRegistrationTokenRequest):
+        """
+        This service is used to Node registration with token for the linux system 
+        """
+
+        # Check weather the token is present 
+        token =  node_request.token 
+
+        if token is None :
+            raise ValueNotFoundException("Token is required")
+
+        node_repo = NodeRepository(self.session)
+        # Check get the token details from the token 
+        try : 
+            node_token = node_repo.get_node_registration_token(token)
+            if node_token is None :
+                raise InvalidTokenException("Invalid Token")
+            if node_token.expire_at < datetime.now():
+                raise TokenExpiredException("Token Expired")
+        except InvalidTokenException as ite :
+            raise ite
+        except TokenExpiredException as tee :
+            raise tee
+        except Exception as e :
+            raise DataBaseException(str(e))  
+        
+        # Generate new API key for the node 
+        token_utils = TokenUtils()
+
+        api_key =  token_utils.generate_node_api_key()
+        
+        api_key_hash = token_utils.generate_node_api_key_has(api_key)
+
+        # Update the node details with the API key and node id
+        try : 
+            node_repo.create_node_credentials(NodeCredential(
+                node_id = node_token.node_id,
+                api_key_hash = api_key_hash,
+                
+            ))
+        except Exception as e :
+            raise DataBaseException(str(e))  
+
+        # Return the API key and node id
+
+        return {
+            "api_key" : api_key,
+            "node_id" : str(node_token.node_id)
+        }
