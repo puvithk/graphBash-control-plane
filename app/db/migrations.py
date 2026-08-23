@@ -35,10 +35,12 @@ def create_all_tables(engine):
 def add_missing_columns(engine):
     """
     Compares Python SQLModel model definitions with actual database tables.
-    If a new field is added to a Python model, this function detects it
-    and automatically executes: ALTER TABLE <table_name> ADD COLUMN <column_name> <data_type>
+    1. If a new field is added to a Python model, this function detects it
+       and automatically executes: ALTER TABLE <table_name> ADD COLUMN <column_name> <data_type>
+    2. If an existing column in Python model allows NULL but DB column is NOT NULL,
+       it automatically updates column nullability to NULL.
     """
-    print("[DB Migration] Step 2: Checking for new columns in models (ALTER TABLE)...")
+    print("[DB Migration] Step 2: Checking for new columns and nullability sync in models (ALTER TABLE)...")
     inspector = inspect(engine)
 
     # Loop through every table defined in SQLModel schemas
@@ -47,13 +49,14 @@ def add_missing_columns(engine):
         if not inspector.has_table(table_name):
             continue
 
-        # Get existing column names from the database
-        existing_column_names = {col["name"] for col in inspector.get_columns(table_name)}
+        # Get existing columns from the database
+        existing_columns = inspector.get_columns(table_name)
+        existing_column_map = {col["name"]: col for col in existing_columns}
 
         # Check each column defined in Python model
         for column in table_obj.columns:
             col_name = column.name
-            if col_name not in existing_column_names:
+            if col_name not in existing_column_map:
                 # Convert SQLAlchemy column type to SQL type string (e.g. VARCHAR, INT, DATETIME)
                 col_type = column.type.compile(engine.dialect)
                 
@@ -70,6 +73,27 @@ def add_missing_columns(engine):
                     connection.commit()
                 
                 print(f"[DB Migration] Successfully added column '{col_name}' to table '{table_name}'.")
+            else:
+                # Column exists. Check if Python model allows NULL but database column is NOT NULL
+                db_col = existing_column_map[col_name]
+                if column.nullable and not db_col.get("nullable", True):
+                    col_type = column.type.compile(engine.dialect)
+                    print(f"[DB Migration] Column '{col_name}' in table '{table_name}' is set to NOT NULL in DB but model allows NULL. Updating nullability...")
+                    try:
+                        dialect_name = engine.dialect.name
+                        if dialect_name in ("mysql", "mariadb"):
+                            alter_sql = f"ALTER TABLE `{table_name}` MODIFY COLUMN `{col_name}` {col_type} NULL"
+                        elif dialect_name == "postgresql":
+                            alter_sql = f'ALTER TABLE "{table_name}" ALTER COLUMN "{col_name}" DROP NOT NULL'
+                        else:
+                            alter_sql = f"ALTER TABLE `{table_name}` MODIFY COLUMN `{col_name}` {col_type} NULL"
+
+                        with engine.connect() as connection:
+                            connection.execute(text(alter_sql))
+                            connection.commit()
+                        print(f"[DB Migration] Successfully updated column '{col_name}' in table '{table_name}' to allow NULL.")
+                    except Exception as err:
+                        print(f"[DB Migration Error] Could not update column '{col_name}' nullability: {err}")
 
     print("[DB Migration] Step 2 complete: Column synchronization complete.")
 
@@ -142,6 +166,33 @@ def drop_column_simple(engine, table_name: str, column_name: str):
     print(f"[Raw SQL] Dropped column '{column_name}' from table '{table_name}'.")
 
 
+def ensure_primary_key_autoincrement(engine):
+    """
+    Ensures that primary key integer columns (e.g. 'id') have AUTO_INCREMENT in MySQL.
+    """
+    if engine.dialect.name not in ("mysql", "mariadb"):
+        return
+
+    inspector = inspect(engine)
+    for table_name, table_obj in SQLModel.metadata.tables.items():
+        if not inspector.has_table(table_name):
+            continue
+
+        existing_columns = inspector.get_columns(table_name)
+        for col in existing_columns:
+            col_name = col["name"]
+            if (col.get("primary_key") or col_name == "id") and not col.get("autoincrement"):
+                print(f"[DB Migration] Enabling AUTO_INCREMENT on '{table_name}.{col_name}'...")
+                try:
+                    alter_sql = f"ALTER TABLE `{table_name}` MODIFY COLUMN `{col_name}` INT AUTO_INCREMENT"
+                    with engine.connect() as connection:
+                        connection.execute(text(alter_sql))
+                        connection.commit()
+                    print(f"[DB Migration] Successfully set AUTO_INCREMENT on '{table_name}.{col_name}'.")
+                except Exception as err:
+                    print(f"[DB Migration Error] Could not set AUTO_INCREMENT on '{table_name}.{col_name}': {err}")
+
+
 def run_db_migrations(engine):
     """
     Main migration runner. Called automatically on server startup / restart.
@@ -152,6 +203,7 @@ def run_db_migrations(engine):
     try:
         create_all_tables(engine)
         add_missing_columns(engine)
+        ensure_primary_key_autoincrement(engine)
         cleanup_obsolete_columns(engine)
         print("[SERVER RESTART] Database schemas are fully up-to-date!\n")
     except Exception as error:
