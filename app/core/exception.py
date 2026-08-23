@@ -37,4 +37,13 @@ class InvalidCredentialsException(Exception):
     def __init__(self , message : str) :
         self.message = message
         super().__init__(self.message)
-    
+
+class InvalidTokenException(Exception):
+    def __init__(self , message : str ):
+        self.message = message 
+        super().__init__(self.message)  
+
+class TokenExpiredException(Exception):
+    def __init__(self , message : str ):
+        self.message = message 
+        super().__init__(self.message)  
