@@ -27,11 +27,11 @@ class NodeDetails(SQLModel , table=True):
 
     id : Optional[int] = Field(default=None , primary_key=True)
 
-    node_id : str = Field(default=None , primary_key=True)
+    node_id : str = Field(default=None , index=True)
     
-    hostname : str = Field(default=None , index=True)
+    hostname : str = Field(default=None )
 
-    node_type : str = Field(default=None , index=True)
+    node_type : str = Field(default=None)
 
     node_ip : str = Field( description="Node IP")
 
@@ -58,7 +58,7 @@ class NodeDetails(SQLModel , table=True):
 
 class NodeCredential(SQLModel , table= True):
 
-    id : Optional[int] = Field(default=None , primary_key=True)
+    id : Optional[int] = Field(default=None , primary_key=True )
 
     node_id : int = Field(
         foreign_key="nodedetails.id",
@@ -67,11 +67,11 @@ class NodeCredential(SQLModel , table= True):
 
     api_key_hash : str = Field(description="API Key Hash")
 
-    certificate_fingerprint : str = Field(description="Certificate Fingerprint")
+    certificate_fingerprint : Optional[str] = Field(default=None, description="Certificate Fingerprint" , nullable=True)
 
-    certificate_expiry : datetime = Field(description="Certificate Expiry")
+    certificate_expiry : Optional[datetime] = Field(default=None, description="Certificate Expiry", nullable=True)
 
-    certificate_serial_number : str = Field(description="Certificate Serial Number")
+    certificate_serial_number : Optional[str] = Field(default=None, description="Certificate Serial Number", nullable=True)
 
 
 class NodeRegisterDetails(SQLModel , table=True):
@@ -111,21 +111,21 @@ class NodeLifeCycle(SQLModel , table=True):
 
     node_updated_at : datetime = Field( description="Node updated at")
 
-    previous_status : NodeStatus = Field( description="Previous node status")
+    previous_status : Optional[NodeStatus] = Field(default=None, description="Previous node status", nullable=True)
 
-    reason : str = Field( description="Reason for status change")
+    reason : Optional[str] = Field(default=None, description="Reason for status change", nullable=True)
 
-    last_connected_at : datetime = Field( description="Last connected at")
+    last_connected_at : Optional[datetime] = Field(default=None, description="Last connected at", nullable=True)
 
-    last_disconnected_at : datetime = Field( description="Last disconnected at")
+    last_disconnected_at : Optional[datetime] = Field(default=None, description="Last disconnected at", nullable=True)
 
-    last_heartbeat : datetime = Field( description="Last heartbeat")
+    last_heartbeat : Optional[datetime] = Field(default=None, description="Last heartbeat", nullable=True)
 
-    last_heartbeat_received_at : datetime = Field( description="Last heartbeat received at")
+    last_heartbeat_received_at : Optional[datetime] = Field(default=None, description="Last heartbeat received at", nullable=True)
 
-    last_task_sent_at : datetime = Field( description="Last task sent at")
+    last_task_sent_at : Optional[datetime] = Field(default=None, description="Last task sent at", nullable=True)
 
-    last_task_received_at : datetime = Field( description="Last task received at")
+    last_task_received_at : Optional[datetime] = Field(default=None, description="Last task received at", nullable=True)
 
     
 
