@@ -16,6 +16,10 @@ class IdRequiredException(Exception):
         self.message = message 
         super().__init__(self.message)
 
+class ValueRequiredException(Exception):
+    def __init__(self , message : str) :
+        self.message = message 
+        super().__init__(self.message)
 
 
 class ValueNotFoundException(Exception):
@@ -23,8 +27,23 @@ class ValueNotFoundException(Exception):
         self.message = message
         super().__init__(self.message)
 
+class DataBaseException(Exception):
+    def __init__(self , message : str) :
+        self.message = message
+        super().__init__(self.message)
+
+
 class InvalidCredentialsException(Exception):
     def __init__(self , message : str) :
         self.message = message
         super().__init__(self.message)
-    
+
+class InvalidTokenException(Exception):
+    def __init__(self , message : str ):
+        self.message = message 
+        super().__init__(self.message)  
+
+class TokenExpiredException(Exception):
+    def __init__(self , message : str ):
+        self.message = message 
+        super().__init__(self.message)  

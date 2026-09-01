@@ -5,11 +5,11 @@ from pydantic import BaseModel , Field
 from datetime import datetime
 class NodeRequestDTO(BaseModel):
 
-    node_id : str = Field(default=None)
-    
-    hostname : str = Field(default=None)
 
-    node_type : str = Field(default=None)
+
+    hostname : str = Field(default=None , index=True)
+
+    node_type : str = Field(default=None , index=True)
 
     node_ip : str = Field( description="Node IP")
 
@@ -19,7 +19,38 @@ class NodeRequestDTO(BaseModel):
 
     node_description : str = Field(description="Node description")
 
-    node_metadata : dict = Field(default={} , description="Node metadata")
+    node_metadata : dict = Field(default=None , index=True)
 
-    node_status : NodeStatus = Field( description="Node status")
+    node_status : NodeStatus = Field(default=None , index=True)
+
+class NodeRegistrationRequestDTO(BaseModel):
+    node_id : str = Field(description="Node ID")
+
+
+
+
+
+    
+    
+class NodeRegistrationToken(BaseModel):
+
+    token : str = Field(description="Token")
+
+    expire_at : datetime = Field(description="TokenExpire At")
+
+class NodeRegistrationResponse(BaseModel):
+
+    api_key : str = Field(description="API KEY for the node")
+
+    node_id : str = Field(description="Node ID")
+
+
+    # Should add CA certifiacates In next phase 
+    
+
+class NodeRegistrationTokenRequest(BaseModel):
+
+    token : str = Field(description="Token")
+
+
 
