@@ -1,13 +1,31 @@
 from yaml import MappingStartEvent
-from .state import MainState
+from .state import MainState , IntendClassifierResponse
+from .utils.models import ChatLLM
+from .prompts import INTEND_CLASSIFIER_PROMPT
+llm = ChatLLM()
+
 
 def intent_classifier(state : MainState) -> MainState:
     """
     This node is used to classify the intent of the query.
     This function uses the query and creates wht the intend of the query.
     """
+    # Get the memory from the data 
+    memory = state.get("memory" , "No previous memory")
+    query = state.get("query" , "")
+    # Based on the prevoius conversation decides the intend
+    
+    
+    # Ask the LLM to classify the intent of the query
+
+    response : IntendClassifierResponse = llm.invoke_with_structured_output(
+        prompt=INTEND_CLASSIFIER_PROMPT.format(query=query , memory=memory),
+        output_structure=IntendClassifierResponse
+        )
+
     return {
-            "intends" : "Provide a summary of the linux system"
+            "intends" : response.intent,
+            "needs_policy_evaluation" : response.needs_policy_evaluation
             }
 
 
