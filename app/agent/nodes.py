@@ -1,3 +1,4 @@
+from langchain_core.output_parsers import StrOutputParser
 from yaml import MappingStartEvent
 from .state import MainState , IntendClassifierResponse
 from .utils.models import ChatLLM
@@ -18,14 +19,15 @@ def intent_classifier(state : MainState) -> MainState:
     
     # Ask the LLM to classify the intent of the query
 
-    response : IntendClassifierResponse = llm.invoke_with_structured_output(
+    response = llm.invoke_with_structured_output(
         prompt=INTEND_CLASSIFIER_PROMPT.format(query=query , memory=memory),
         output_structure=IntendClassifierResponse
         )
 
-    return {
-            "intends" : response.intent,
-            "needs_policy_evaluation" : response.needs_policy_evaluation
+    return {    
+            "intend" : response.intent,
+            "needs_policy_evaluation" : response.needs_policy_evaluation ,
+            "reason" : response.reason
             }
 
 

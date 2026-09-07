@@ -1,5 +1,5 @@
-from pydantic import Field
-from groq import BaseModel
+from pydantic import Field , BaseModel
+
 from typing import TypedDict
 class MainState(TypedDict):
     """
@@ -12,6 +12,8 @@ class MainState(TypedDict):
 
     intends :str
 
+    reason : str 
+
     planner : list[str]
 
     tools : list[str]
@@ -23,6 +25,7 @@ class MainState(TypedDict):
     granted_premission : list[dict[str , bool]]
 
     route : str
+
 
     is_validated  : bool
 

@@ -28,7 +28,7 @@ class GroqLLM:
 
 
 class ChatLLM:
-    def __init__(self, llm_provider="groq", llm_model="llama-3.1-8b-instant"):
+    def __init__(self, llm_provider="groq", llm_model="openai/gpt-oss-20b"):
         self.llm_provider = llm_provider
         self.llm_model = llm_model
         if self.llm_provider == "groq":
@@ -52,12 +52,6 @@ class ChatLLM:
         for attempt in range(config.MAX_LLM_TRIES):
             try:
                 response = llm.invoke(prompt)
-                if hasattr(response, "model_dump_json"):
-                    return response.model_dump_json()
-                elif hasattr(response, "json"):
-                    return response.json()
-                elif hasattr(response, "json_dump"):
-                    return response.json_dump()
                 return response
             except Exception as e:
                 if attempt == config.MAX_LLM_TRIES - 1:
