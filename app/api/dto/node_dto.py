@@ -1,8 +1,12 @@
 
 
-from app.api.schemas.node import NodeStatus
-from pydantic import BaseModel , Field
 from datetime import datetime
+
+from pydantic import BaseModel, Field
+
+from app.api.schemas.node import NodeStatus
+
+
 class NodeRequestDTO(BaseModel):
 
 

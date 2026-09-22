@@ -1,5 +1,7 @@
 from pydantic import BaseModel
+
 from .schemas import ToolMetadata
+
 
 class ToolRegistry(BaseModel):
 

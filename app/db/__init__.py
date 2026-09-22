@@ -1,3 +1,3 @@
-from .migrations import run_db_migrations, create_all_tables, add_missing_columns
+from .migrations import add_missing_columns, create_all_tables, run_db_migrations
 
-__all__ = ["run_db_migrations", "create_all_tables", "add_missing_columns"]
+__all__ = ["add_missing_columns", "create_all_tables", "run_db_migrations"]

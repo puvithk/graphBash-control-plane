@@ -9,17 +9,10 @@ It checks for database changes:
 4. Provides simple, clear helper functions for manual table operations.
 """
 
-from sqlalchemy import inspect, text
-from sqlmodel import SQLModel
 
 # Import all schemas/models so SQLModel metadata registers all tables
-from app.api.schemas.user import User
-from app.api.schemas.node import (
-    NodeDetails,
-    NodeCredential,
-    NodeRegisterDetails,
-    NodeLifeCycle,
-)
+from sqlalchemy import inspect, text
+from sqlmodel import SQLModel
 
 
 def create_all_tables(engine):

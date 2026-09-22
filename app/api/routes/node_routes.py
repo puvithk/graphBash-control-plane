@@ -1,18 +1,30 @@
-from app.api.dto.node_dto import NodeRegistrationRequestDTO
-from app.api.dto.node_dto import NodeRegistrationTokenRequest
-from app.api.dto.node_dto import NodeRegistrationResponse
-from app.api.dto.node_dto import NodeRegistrationToken
-from fastapi import status
-from fastapi import HTTPException
-from typing import Annotated, List
-from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends
+from typing import Annotated
 
-from app.api.dto.node_dto import NodeRequestDTO
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.api.dto.node_dto import (
+    NodeRegistrationRequestDTO,
+    NodeRegistrationResponse,
+    NodeRegistrationToken,
+    NodeRegistrationTokenRequest,
+    NodeRequestDTO,
+)
+from app.api.middleware.auth_token import CurrentUser, verify_auth_token
 from app.api.schemas.node import NodeDetails
 from app.core.database import get_session
+from app.core.exception import (
+    DataBaseException,
+    InvalidTokenException,
+    NoOwnerIdProvidedException,
+    TokenExpiredException,
+    ValueNotFoundException,
+)
+
 from ..service.node_service import NodeService
-from app.api.middleware.auth_token import verify_auth_token, CurrentUser
+
+INVALID_OR_EXPIRED_TOKEN_PAYLOAD = "Invalid or expired token payload"
+
 route = APIRouter(
     prefix="/nodes",
     tags=["nodes"],
@@ -22,7 +34,7 @@ route = APIRouter(
 SessionDep = Annotated[Session, Depends(get_session)]
 
 
-@route.get("/lists", response_model=List[NodeDetails])
+@route.get("/lists", response_model=list[NodeDetails])
 def get_all_nodes(session: SessionDep, current_user: CurrentUser):
     node_service = NodeService(session)
     owner_id = current_user.get("user_id")
@@ -32,7 +44,7 @@ def get_all_nodes(session: SessionDep, current_user: CurrentUser):
     if owner_id is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token payload",
+            detail=INVALID_OR_EXPIRED_TOKEN_PAYLOAD,
             headers={"WWW-Authenticate": "Bearer"},
         )
     return node_service.get_all_node(owner_id)
@@ -48,7 +60,7 @@ def get_node_by_id(session: SessionDep, node_id: str , current_user : CurrentUse
     if owner_id is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token payload",
+            detail=INVALID_OR_EXPIRED_TOKEN_PAYLOAD,
             headers={"WWW-Authenticate": "Bearer"},
         )
     node = node_service.get_node_by_id(node_id, owner_id)
@@ -71,7 +83,7 @@ def create_node(session: SessionDep, node_request: NodeRequestDTO , current_user
     if owner_id is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token payload",
+            detail=INVALID_OR_EXPIRED_TOKEN_PAYLOAD,
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -92,31 +104,55 @@ def node_registration_request(session : SessionDep , node_request : NodeRegistra
     if owner_id is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token payload",
+            detail=INVALID_OR_EXPIRED_TOKEN_PAYLOAD,
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    try : 
-        node_registration_token = node_service.node_registration_request(node_request=node_request , owner_id = owner_id)
-    except Exception as e : 
+    try:
+        node_registration_token = node_service.node_registration_request(
+            node_request=node_request, owner_id=owner_id
+        )
+    except ValueNotFoundException as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from e
+    except NoOwnerIdProvidedException as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(e),
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from e
+    except DataBaseException as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e),
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from e
 
     return node_registration_token
 
 
-@route.post("/node-registration" , response_model = NodeRegistrationResponse )
-def node_registration(session : SessionDep , node_request : NodeRegistrationTokenRequest):
+@route.post("/node-registration", response_model=NodeRegistrationResponse)
+def node_registration(session: SessionDep, node_request: NodeRegistrationTokenRequest):
     node_service = NodeService(session)
-    try :
+    try:
         node_registration = node_service.node_registration(node_request=node_request)
-    except Exception as e :
+    except (InvalidTokenException, TokenExpiredException) as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(e),
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from e
+    except ValueNotFoundException as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        ) from e
+    except DataBaseException as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e),
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from e
     return node_registration

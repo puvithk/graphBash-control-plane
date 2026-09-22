@@ -1,11 +1,8 @@
-from functools import lru_cache
-from sqlmodel import create_engine , Session , SQLModel
+import os
 
-from ..api.schemas.node import NodeDetails , NodeCredential , NodeRegisterDetails, NodeLifeCycle
-from ..api.schemas.user import User
 from dotenv import load_dotenv
+from sqlmodel import Session, create_engine
 
-import os 
 load_dotenv()
 
 # Database configuration 
@@ -21,4 +18,4 @@ def get_session():
 
 if __name__ == "__main__" :
     from app.db.migrations import run_db_migrations
-    run_db_migrations(_engine)
+    run_db_migrations(_engine)

@@ -1,9 +1,12 @@
 
 
-from sqlalchemy.engine import default
-from app.api.schemas.user import UserStatus
-from pydantic import BaseModel , Field
 from datetime import datetime
+
+from pydantic import BaseModel, Field
+
+from app.api.schemas.user import UserStatus
+
+
 class UserSignUpRequest(BaseModel):
 
     user_name : str = Field(default=None )

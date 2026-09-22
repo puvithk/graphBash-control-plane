@@ -1,6 +1,7 @@
+import os
 import unittest
 from unittest.mock import MagicMock, patch
-import os
+
 from pydantic import BaseModel, Field
 
 from app.agent.utils.models import ChatLLM, GroqLLM
@@ -31,6 +32,7 @@ class TestGroqLLM(unittest.TestCase):
     def test_initialization_custom_model(self, mock_chat_groq):
         custom_model_name = "llama-3.3-70b-versatile"
         model = GroqLLM(model=custom_model_name)
+        self.assertEqual(model.model_provider(), "groq")
         mock_chat_groq.assert_called_once_with(
             model=custom_model_name,
             verbose=True,
@@ -72,8 +74,8 @@ class TestChatLLM(unittest.TestCase):
     def test_chat_llm_default_initialization(self, mock_groq_llm):
         chat = ChatLLM()
         self.assertEqual(chat.llm_provider, "groq")
-        self.assertEqual(chat.llm_model, "llama-3.1-8b-instant")
-        mock_groq_llm.assert_called_once_with("llama-3.1-8b-instant")
+        self.assertEqual(chat.llm_model, "openai/gpt-oss-20b")
+        mock_groq_llm.assert_called_once_with("openai/gpt-oss-20b")
 
     @patch("app.agent.utils.models.GroqLLM")
     def test_chat_llm_custom_initialization(self, mock_groq_llm):
@@ -140,7 +142,7 @@ class TestChatLLM(unittest.TestCase):
         chat = ChatLLM()
         result = chat.invoke_with_structured_output("Check server health", SampleOutputSchema)
 
-        self.assertEqual(result, parsed_obj.model_dump_json())
+        self.assertEqual(result, parsed_obj)
         mock_model_instance.with_structured_output.assert_called_once_with(SampleOutputSchema)
         mock_structured_llm.invoke.assert_called_once_with("Check server health")
 

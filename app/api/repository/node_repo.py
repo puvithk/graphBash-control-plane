@@ -1,16 +1,15 @@
-from app.api.schemas.node import NodeCredential
-from app.api.schemas.node import NodeRegisterDetails
-from app.api.dto.node_dto import NodeRegistrationToken
 from sqlalchemy import select
-from app.api.schemas.node import NodeDetails
-from typing import List
 from sqlalchemy.orm import Session
-class NodeRepository():
+
+from app.api.schemas.node import NodeCredential, NodeDetails, NodeRegisterDetails
+
+
+class NodeRepository:
     def __init__(self , session : Session) :
         self.session = session 
     
 
-    def get_all_nodees(self , owner_id : int) -> List[NodeDetails]:
+    def get_all_nodees(self , owner_id : int) -> list[NodeDetails]:
         return self.session.execute(select(NodeDetails).where(NodeDetails.owner_id == owner_id)).scalars().all()
 
     def get_node_by_id(self , node_id : str , owner_id : int) -> NodeDetails | None:

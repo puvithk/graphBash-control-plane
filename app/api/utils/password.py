@@ -13,5 +13,5 @@ class PasswordUtils:
         hashed_bytes = hashed_password.encode('utf-8')
         try:
             return bcrypt.checkpw(pwd_bytes[:72], hashed_bytes)
-        except Exception:
-            return False
+        except ValueError:
+            return False

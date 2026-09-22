@@ -1,14 +1,17 @@
 
-from app.core.exception import ValueNotFoundException
-from uuid import uuid4
-from datetime import datetime
-from app.core.exception import ValueAlreadyExistsException
-from app.api.repository.user_repo import UserRepositoy
+from datetime import UTC, datetime
+
 from sqlalchemy.orm import Session
-from ..dto.user_dto import UserSignUpRequest , UserSignUpResponse
-from ..schemas.user import User
+
+from app.api.repository.user_repo import UserRepositoy
 from app.api.utils.password import PasswordUtils
-class UserService():
+from app.core.exception import ValueAlreadyExistsException, ValueNotFoundException
+
+from ..dto.user_dto import UserSignUpRequest, UserSignUpResponse
+from ..schemas.user import User
+
+
+class UserService:
 
 
     def __init__(self , session : Session):
@@ -29,8 +32,8 @@ class UserService():
             user_hash = PasswordUtils().hash(user_request.user_password),
             user_role = user_request.user_role,
             user_status = user_request.user_status,
-            user_created_at = datetime.now(),
-            user_updated_at = datetime.now()
+            user_created_at = datetime.now(tz=UTC),
+            user_updated_at = datetime.now(tz=UTC)
         )
         
 

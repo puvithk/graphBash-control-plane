@@ -1,6 +1,7 @@
 from .graph import workflow
 from .state import MainState
 
+
 def agent(query : str) -> MainState :
     """
 

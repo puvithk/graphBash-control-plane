@@ -1,8 +1,9 @@
 
 import hashlib
 import secrets
-import os
-class TokenUtils():
+
+
+class TokenUtils:
     def generate_node_registration_token(self) -> str:
         return secrets.token_hex(32)
     

@@ -1,40 +1,49 @@
 
 
-from app.api.schemas.node import NodeCredential
-from app.core.exception import TokenExpiredException
-from app.core.exception import InvalidTokenException
-from app.api.dto.node_dto import NodeRegistrationTokenRequest
-from app.core.exception import ValueNotFoundException
-from app.api.schemas.node import NodeRegisterDetails
-from app.core.exception import DataBaseException
-from app.api.dto.node_dto import NodeRegistrationToken
-from app.core.exception import IdRequiredException
-from app.core.exception import NoOwnerIdProvidedException
-from datetime import datetime , timedelta
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
-from app.core.exception import ValueAlreadyExistsException , ValueRequiredException
-from app.api.dto.node_dto import NodeRequestDTO , NodeRegistrationRequestDTO
-from app.api.schemas.node import NodeDetails
-from typing import List
+
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+
+from app.api.dto.node_dto import (
+    NodeRegistrationRequestDTO,
+    NodeRegistrationToken,
+    NodeRegistrationTokenRequest,
+    NodeRequestDTO,
+)
+from app.api.schemas.node import NodeCredential, NodeDetails, NodeRegisterDetails
+from app.core.exception import (
+    DataBaseException,
+    IdRequiredException,
+    InvalidTokenException,
+    NoOwnerIdProvidedException,
+    TokenExpiredException,
+    ValueNotFoundException,
+)
+
 from ..repository.node_repo import NodeRepository
 from ..utils.token import TokenUtils
-class NodeService():
+
+OWNER_NOT_PRESENT = "Owner not present"
+
+
+class NodeService:
 
     def __init__(self , session : Session):
         self.session = session
 
 
-    def get_all_node(self , owner_id : int) -> List[NodeDetails]:
+    def get_all_node(self , owner_id : int | None = None) -> list[NodeDetails]:
         
         node_repo = NodeRepository(self.session)
         if owner_id is None:
-            raise NoOwnerIdProvidedException("Owner not present")
+            raise NoOwnerIdProvidedException(OWNER_NOT_PRESENT)
         node_list = node_repo.get_all_nodees(owner_id)
         return node_list
 
 
-    def create_node(self,node_request : NodeRequestDTO , owner_id : int = None) -> NodeDetails:
+    def create_node(self,node_request : NodeRequestDTO , owner_id : int  | None= None) -> NodeDetails:
         
         
         node_repo = NodeRepository(self.session)
@@ -52,13 +61,13 @@ class NodeService():
             node_description = node_request.node_description,
             node_metadata = node_request.node_metadata,
             node_status = node_request.node_status,
-            node_created_at = datetime.now(),
-            node_updated_at = datetime.now(),
+            node_created_at = datetime.now(tz=UTC),
+            node_updated_at = datetime.now(tz=UTC),
             owner_id = owner_id
         )
         
         if owner_id is None:
-            raise NoOwnerIdProvidedException("Ownwer not present")
+            raise NoOwnerIdProvidedException(OWNER_NOT_PRESENT)
 
         if node_request.node_status is None:
             node_details.node_status = "Unknown"
@@ -85,27 +94,27 @@ class NodeService():
         return node_details
     
 
-    def get_node_by_id(self , node_id : str = None , owner_id : int = None):
+    def get_node_by_id(self , node_id : str | None = None , owner_id : int | None = None):
         
         if node_id  is None:
             raise IdRequiredException("Node id is requeired")
         
         if owner_id is None:
-            raise NoOwnerIdProvidedException("Owner not present")
+            raise NoOwnerIdProvidedException(OWNER_NOT_PRESENT)
 
         node_repo  = NodeRepository(self.session)
 
         return node_repo.get_node_by_id(node_id , owner_id)
 
 
-    def node_registration_request(self , node_request : NodeRegistrationRequestDTO , owner_id : int = None) -> NodeRegistrationToken:
+    def node_registration_request(self , node_request : NodeRegistrationRequestDTO , owner_id : int | None = None) -> NodeRegistrationToken:
         
 
         # Check weather basic info is present   
 
 
         if owner_id is None:
-            raise NoOwnerIdProvidedException("Owner not present")
+            raise NoOwnerIdProvidedException(OWNER_NOT_PRESENT)
 
 
         # Generate a token using secure random module 
@@ -113,32 +122,31 @@ class NodeService():
 
 
 
-        try :
+        try:
             node_repo = NodeRepository(self.session)
-            current_node = node_repo.get_node_by_id(node_request.node_id , owner_id)
-            if not current_node:
-                raise ValueNotFoundException("Node not found")
-        except ValueNotFoundException as ve :
-            raise ve
-        except Exception as e:
-            raise DataBaseException(str(e))
+            current_node = node_repo.get_node_by_id(node_request.node_id, owner_id)
+        except SQLAlchemyError as e:
+            raise DataBaseException(str(e)) from e
+
+        if not current_node:
+            raise ValueNotFoundException("Node not found")
         
         token_generator =  token_utils.generate_node_registration_token()
         node_registration_token = NodeRegisterDetails(
             token = token_generator,
             node_id = current_node.id ,
-            expire_at = datetime.now() + timedelta(minutes=15),
-            created_at = datetime.now(),
+            expire_at = datetime.now(tz=UTC) + timedelta(minutes=15),
+            created_at = datetime.now(tz=UTC),
             owner_id = owner_id,
         )
 
 
         # Create Node Registration Token Update in database
-        try :
+        try:
             node_repo = NodeRepository(self.session)
             node_repo.create_node_registration_token(node_registration_token)
-        except Exception as e :
-            raise DataBaseException(str(e))        
+        except SQLAlchemyError as e:
+            raise DataBaseException(str(e)) from e        
         # Update the redis Make the expire time currentime + 15 min
         
         
@@ -166,18 +174,15 @@ class NodeService():
 
         node_repo = NodeRepository(self.session)
         # Check get the token details from the token 
-        try : 
+        try: 
             node_token = node_repo.get_node_registration_token(token)
-            if node_token is None :
-                raise InvalidTokenException("Invalid Token")
-            if node_token.expire_at < datetime.now():
-                raise TokenExpiredException("Token Expired")
-        except InvalidTokenException as ite :
-            raise ite
-        except TokenExpiredException as tee :
-            raise tee
-        except Exception as e :
-            raise DataBaseException(str(e))  
+        except SQLAlchemyError as e:
+            raise DataBaseException(str(e)) from e
+
+        if node_token is None:
+            raise InvalidTokenException("Invalid Token")
+        if node_token.expire_at < datetime.now(tz=UTC):
+            raise TokenExpiredException("Token Expired")  
         
         # Generate new API key for the node 
         token_utils = TokenUtils()
@@ -187,14 +192,14 @@ class NodeService():
         api_key_hash = token_utils.generate_node_api_key_has(api_key)
 
         # Update the node details with the API key and node id
-        try : 
+        try: 
             node_repo.create_node_credentials(NodeCredential(
                 node_id = node_token.node_id,
                 api_key_hash = api_key_hash,
                 
             ))
-        except Exception as e :
-            raise DataBaseException(str(e))  
+        except SQLAlchemyError as e:
+            raise DataBaseException(str(e)) from e  
 
         # Return the API key and node id
 

@@ -1,6 +1,8 @@
-from pydantic import Field , BaseModel
-
 from typing import TypedDict
+
+from pydantic import BaseModel, Field
+
+
 class MainState(TypedDict):
     """
     This is the main state used in the Graph

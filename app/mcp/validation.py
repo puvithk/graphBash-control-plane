@@ -1,11 +1,10 @@
 
-from pydantic import BaseModel
-from .schemas import ToolRequest
 from .node_manager import NodeManager
 from .registry import ToolRegistry
+from .schemas import ToolRequest
 
 
-class RequestValidator():
+class RequestValidator:
     def __init__(
         self,
         registry: ToolRegistry,

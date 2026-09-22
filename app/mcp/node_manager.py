@@ -1,7 +1,9 @@
 
-from pydantic import BaseModel , field_validator
+from pydantic import BaseModel, ConfigDict, field_validator
+
 from .schemas import NodeRegistration
-from pydantic import ConfigDict
+
+
 class NodeManager(BaseModel):
 
     model_config = ConfigDict(extra="ignore")

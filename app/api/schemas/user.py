@@ -1,10 +1,10 @@
 
 
 
-from enum import Enum
-from sqlalchemy import table
-from sqlmodel import SQLModel, Field , DateTime  
 from datetime import datetime
+from enum import Enum
+
+from sqlmodel import Field, SQLModel
 
 
 class UserRole(str, Enum):

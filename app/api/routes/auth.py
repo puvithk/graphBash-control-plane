@@ -1,24 +1,19 @@
 
 
 
-from fastapi import HTTPException
-from app.core.exception import InvalidCredentialsException
-from app.core.exception import ValueNotFoundException
-from app.api.service.auth_service import AuthService
-from app.api.service.admin import AdminService
-from app.api.dto.user_dto import UserLoginResponse
-from app.api.service.user_service import UserService
-from app.api.service import user_service
-from app.api.dto.user_dto import UserSignUpRequest
-from app.api.dto.user_dto import UserSignInRequest
-from app.api.dto.user_dto import UserSignUpResponse
-from app.core.database import get_session
-from fastapi import Depends
-from sqlalchemy.util.typing import Annotated
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from sys import prefix
-from fastapi import APIRouter
+from sqlalchemy.util.typing import Annotated
 
+from app.api.dto.user_dto import (
+    UserLoginResponse,
+    UserSignInRequest,
+    UserSignUpRequest,
+    UserSignUpResponse,
+)
+from app.api.service.auth_service import AuthService
+from app.core.database import get_session
+from app.core.exception import InvalidCredentialsException, ValueNotFoundException
 
 route = APIRouter(prefix="/auth" , tags=["auth"])
 

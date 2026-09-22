@@ -1,7 +1,9 @@
 
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
-from .api.routes import node_routes , auth
+
+from .api.routes import auth, node_routes
 from .core.database import _engine
 from .db.migrations import run_db_migrations
 

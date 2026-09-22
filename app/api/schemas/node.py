@@ -1,17 +1,12 @@
 
 
-from typing import Optional
-from enum import Enum
-from http.cookiejar import FileCookieJar
-from app.api.schemas.user import User
-from sqlalchemy import JSON
-from sqlalchemy import Column
-from sqlalchemy.dialects.postgresql import Any
-from ast import Dict
-from sqlalchemy import true
-from sqlalchemy import table
-from sqlmodel import SQLModel ,Field
+
 from datetime import datetime
+from enum import Enum
+
+from sqlalchemy import JSON, Column
+from sqlmodel import Field, SQLModel
+
 
 class NodeStatus(str , Enum):
     PENDING = "pending"
@@ -21,11 +16,14 @@ class NodeStatus(str , Enum):
     BLOCKED = "blocked"
     UNKNOWN = "unknown"
     
-
+NODE_DETAILS = "nodedetails"
+NODE_DESCRIPTION = "Node ID"
 
 class NodeDetails(SQLModel , table=True):
 
-    id : Optional[int] = Field(default=None , primary_key=True)
+    __tablename__ = NODE_DETAILS
+
+    id : int | None = Field(default=None , primary_key=True)
 
     node_id : str = Field(default=None , index=True)
     
@@ -58,29 +56,29 @@ class NodeDetails(SQLModel , table=True):
 
 class NodeCredential(SQLModel , table= True):
 
-    id : Optional[int] = Field(default=None , primary_key=True )
+    id : int | None = Field(default=None , primary_key=True )
 
     node_id : int = Field(
-        foreign_key="nodedetails.id",
+        foreign_key=f"{NODE_DETAILS}.id",
         index= True ,
-        description="Node ID" )
+        description=NODE_DESCRIPTION     )
 
     api_key_hash : str = Field(description="API Key Hash")
 
-    certificate_fingerprint : Optional[str] = Field(default=None, description="Certificate Fingerprint" , nullable=True)
+    certificate_fingerprint : str | None = Field(default=None, description="Certificate Fingerprint" , nullable=True)
 
-    certificate_expiry : Optional[datetime] = Field(default=None, description="Certificate Expiry", nullable=True)
+    certificate_expiry : datetime | None = Field(default=None, description="Certificate Expiry", nullable=True)
 
-    certificate_serial_number : Optional[str] = Field(default=None, description="Certificate Serial Number", nullable=True)
+    certificate_serial_number : str | None = Field(default=None, description="Certificate Serial Number", nullable=True)
 
 
 class NodeRegisterDetails(SQLModel , table=True):
 
-    id : Optional[int] = Field(default=None , primary_key=True )
+    id : int | None = Field(default=None , primary_key=True )
 
     node_id : int = Field(
-        foreign_key="nodedetails.id",
-        index= True , description="Node ID" )
+        foreign_key=f"{NODE_DETAILS}.id",
+        index= True , description=NODE_DESCRIPTION )
 
     owner_id : int = Field(
         foreign_key="user.user_id",
@@ -100,32 +98,32 @@ class NodeRegisterDetails(SQLModel , table=True):
 
 class NodeLifeCycle(SQLModel , table=True):
 
-    id : Optional[int] = Field(default=None , primary_key=True)
+    id : int | None = Field(default=None , primary_key=True)
 
     node_id : int = Field(
-        foreign_key="nodedetails.id",
+        foreign_key=f"{NODE_DETAILS}.id",
         index= True ,
-        description="Node ID" )
+        description=NODE_DESCRIPTION )
 
     node_status : NodeStatus = Field( description="Node status")
 
     node_updated_at : datetime = Field( description="Node updated at")
 
-    previous_status : Optional[NodeStatus] = Field(default=None, description="Previous node status", nullable=True)
+    previous_status : NodeStatus | None = Field(default=None, description="Previous node status", nullable=True)
 
-    reason : Optional[str] = Field(default=None, description="Reason for status change", nullable=True)
+    reason : str | None = Field(default=None, description="Reason for status change", nullable=True)
 
-    last_connected_at : Optional[datetime] = Field(default=None, description="Last connected at", nullable=True)
+    last_connected_at : datetime | None = Field(default=None, description="Last connected at", nullable=True)
 
-    last_disconnected_at : Optional[datetime] = Field(default=None, description="Last disconnected at", nullable=True)
+    last_disconnected_at : datetime | None = Field(default=None, description="Last disconnected at", nullable=True)
 
-    last_heartbeat : Optional[datetime] = Field(default=None, description="Last heartbeat", nullable=True)
+    last_heartbeat : datetime | None = Field(default=None, description="Last heartbeat", nullable=True)
 
-    last_heartbeat_received_at : Optional[datetime] = Field(default=None, description="Last heartbeat received at", nullable=True)
+    last_heartbeat_received_at : datetime | None = Field(default=None, description="Last heartbeat received at", nullable=True)
 
-    last_task_sent_at : Optional[datetime] = Field(default=None, description="Last task sent at", nullable=True)
+    last_task_sent_at : datetime | None = Field(default=None, description="Last task sent at", nullable=True)
 
-    last_task_received_at : Optional[datetime] = Field(default=None, description="Last task received at", nullable=True)
+    last_task_received_at : datetime | None = Field(default=None, description="Last task received at", nullable=True)
 
     
 

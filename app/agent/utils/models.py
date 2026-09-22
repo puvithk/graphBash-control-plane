@@ -1,8 +1,8 @@
-from typing import Any
-from app.core import config
-from langchain_groq import ChatGroq
-import os 
+import groq
 from dotenv import load_dotenv
+from langchain_groq import ChatGroq
+
+from app.core import config
 
 load_dotenv()
 
@@ -42,9 +42,9 @@ class ChatLLM:
             try:
                 response = self.chat_model.invoke(prompt)
                 return response
-            except Exception as e:
+            except (groq.GroqError, RuntimeError, ValueError, TimeoutError, ConnectionError) as e:
                 if attempt == config.MAX_LLM_TRIES - 1:
-                    raise ValueError("LLM Error " + str(e))
+                    raise ValueError("LLM Error " + str(e)) from e
 
     def invoke_with_structured_output(self, prompt: str, output_structure):
         llm = self.chat_model.with_structured_output(output_structure)
@@ -53,6 +53,6 @@ class ChatLLM:
             try:
                 response = llm.invoke(prompt)
                 return response
-            except Exception as e:
+            except (groq.GroqError, RuntimeError, ValueError, TimeoutError, ConnectionError) as e:
                 if attempt == config.MAX_LLM_TRIES - 1:
-                    raise ValueError("LLM Error " + str(e))
+                    raise ValueError("LLM Error " + str(e)) from e
